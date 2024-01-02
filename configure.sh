@@ -148,7 +148,7 @@ echo "Downloading extension..."
 echo "#############################"
 mkdir -p "$parentDir/extension"
 touch "$parentDir/extension/version.txt"
-node download-extension.js "$parentDir/extension"
+node src/download-extension.js "$parentDir/extension"
 
 # Kill the Xvfb process
 kill $(cat /tmp/xvfb.pid)
