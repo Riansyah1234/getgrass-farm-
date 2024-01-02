@@ -136,6 +136,12 @@ echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.co
 sudo apt-get update
 sudo apt-get install nodejs -y
 
+echo "#############################"
+echo "Installing dependencies..."
+echo "#############################"
+cd $srcdir
+npm install
+
 # Start Xvfb and save its PID to a file
 Xvfb :99 -screen 0 800x600x24 &
 echo $! >/tmp/xvfb.pid
@@ -148,7 +154,7 @@ echo "Downloading extension..."
 echo "#############################"
 mkdir -p "$parentDir/extension"
 touch "$parentDir/extension/version.txt"
-node src/download-extension.js "$parentDir/extension"
+node download-extension.js "$parentDir/extension"
 
 # Kill the Xvfb process
 kill $(cat /tmp/xvfb.pid)
