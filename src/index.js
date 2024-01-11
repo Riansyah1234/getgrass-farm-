@@ -201,28 +201,41 @@ async function run() {
       } else {
         // check if extension if connected or disconnected
         const badgeSelector = '.chakra-badge';
-        const badge = await page.waitForSelector(badgeSelector, {
-          timeout: 10 * 1000,
-        });
-        const p = await badge.$('p');
-        const connectedText = await p.evaluate((el) => el.innerText);
-
-        if (connectedText === 'Connected') {
-          console.log('extension is connected, timestamp:', Date.now());
-          return;
-        } else {
-          console.log(
-            `extension is not connected. connection status: '${connectedText}'. pressing reconnect, timestamp: ${Date.now()}`
-          );
-
-          await page.evaluate(() => {
-            const reconnectButtonSelector =
-              '#menu-list-\\:r1\\:-menuitem-\\:r2\\:';
-            const button = document.querySelector(reconnectButtonSelector);
-            if (button) {
-              button.click();
-            }
+        try {
+          const badge = await page.waitForSelector(badgeSelector, {
+            timeout: 10 * 1000,
           });
+          const p = await badge.$('p');
+          const connectedText = await p.evaluate((el) => el.innerText);
+
+          if (connectedText === 'Connected') {
+            console.log('extension is connected, timestamp:', Date.now());
+            return;
+          } else {
+            console.log(
+              `extension is not connected. connection status: '${connectedText}'. pressing reconnect, timestamp: ${Date.now()}`
+            );
+
+            await page.evaluate(() => {
+              const reconnectButtonSelector =
+                '#menu-list-\\:r1\\:-menuitem-\\:r2\\:';
+              const button = document.querySelector(reconnectButtonSelector);
+              if (button) {
+                button.click();
+              }
+            });
+          }
+        } catch (error) {
+          // check if it's a timeout error
+          if (error.name !== 'TimeoutError') {
+            throw error;
+          }
+          console.log(
+            'timeout error, reloading extension page, timestamp:',
+            Date.now()
+          );
+          // reload page
+          await page.reload();
         }
       }
     } catch (error) {
@@ -309,6 +322,14 @@ async function run() {
       return;
     }
 
+    // await rand number of seconds
+    await new Promise((resolve) =>
+      setTimeout(
+        resolve,
+        Math.random() * EXTENSION_REFRESH_RAND_RANGE_SECONDS * 1000
+      )
+    );
+
     console.log('refreshing extension. timestamp:', Date.now());
     for (let i = 0; i < browsers.length; i++) {
       const browser = browsers[i];
@@ -347,14 +368,6 @@ async function run() {
         console.error('Error refreshing extension:', error);
       }
     }
-
-    // ! doesn't work because setInterval doesn't wait for async functions to finish
-    // await new Promise((resolve) =>
-    //   setTimeout(
-    //     resolve,
-    //     Math.random() * EXTENSION_REFRESH_RAND_RANGE_SECONDS * 1000
-    //   )
-    // );
   }, EXTENSION_REFRESH_FREQUENCY_MINUTES * 60 * 1000);
   intervalIds.push(extensionReconnectIntervalId);
 }
