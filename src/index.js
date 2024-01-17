@@ -284,10 +284,14 @@ async function run() {
 
     // check all are signed in
     for (let i = 0; i < browsers.length; i++) {
-      await ensureLoggedIn(browsers[i], i);
-      const extensionPages = await getExtensionPages(browsers[i]);
-      if (extensionPages.length > 0) {
-        await reconnectExtension(extensionPages[0]);
+      try {
+        await ensureLoggedIn(browsers[i], i);
+        const extensionPages = await getExtensionPages(browsers[i]);
+        if (extensionPages.length > 0) {
+          await reconnectExtension(extensionPages[0]);
+        }
+      } catch (error) {
+        console.error('Error ensuring logged in:', error);
       }
     }
     launching = false;
