@@ -189,6 +189,7 @@ async function run() {
 
   async function reconnectExtension(page) {
     try {
+      // take a screenshot of extension
       const spinnerSelector = '.chakra-spinner';
       const spinner = await page.$(spinnerSelector);
 
@@ -359,6 +360,10 @@ async function run() {
           continue;
         }
 
+        console.log(`taking a screenshot of browser ${i}'s extension page`);
+        await extensionPages[0].screenshot({
+          path: path.join(extensionDir, `extension-${i}.png`),
+        });
         console.log('refreshing extension page for browser', i);
         const extensionPage = extensionPages[0];
         const [_, __, username, password] = parseProxy(users[i].proxyString);
