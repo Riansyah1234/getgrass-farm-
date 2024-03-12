@@ -177,4 +177,4 @@ docker build -t grass_image "$parentDir/src"
 echo "#############################"
 echo "Running..."
 echo "#############################"
-docker run --rm --restart=always --log-opt max-size=1m --name grass -v "$parentDir":/app grass_image
+docker run --restart=always --log-opt max-size=1m --name grass -v "$parentDir":/app grass_image
