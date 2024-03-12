@@ -50,6 +50,8 @@ docker stop grass
 docker rm grass
 # delete grass_image docker image
 docker image rm grass_image
+# prune
+docker prune
 
 parentDir="$HOME/grass"
 sudo rm -rf $parentDir
