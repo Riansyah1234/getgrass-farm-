@@ -155,6 +155,7 @@ async function run() {
 
     const [_, __, username, password] = parseProxy(users[index].proxyString);
 
+    console.log('browser:', browser);
     const page = await browser.newPage();
     await page.authenticate({ username, password });
     await Promise.all([
