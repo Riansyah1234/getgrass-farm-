@@ -187,7 +187,7 @@ async function run() {
     await page?.close();
   }
 
-  async function reconnectExtension(page) {
+  async function reconnectExtension(page, browserIndex) {
     try {
       // take a screenshot of extension
       const spinnerSelector = '.chakra-spinner';
@@ -231,12 +231,53 @@ async function run() {
           if (error.name !== 'TimeoutError') {
             throw error;
           }
-          console.log(
-            'timeout error, reloading extension page, timestamp:',
-            Date.now()
-          );
-          // reload page
-          await page.reload();
+          // check if the extension is showing a login page
+          const extensionLoginSelector = 'button.chakra-button.css-1krcbxa';
+          const extensionLoginButton = await page.$(extensionLoginSelector);
+
+          if (extensionLoginButton) {
+            console.log(
+              'extension is showing login page, clearing cache and cookies, timestamp:',
+              Date.now()
+            );
+            // go to website
+            let loginPage = await (await page.browser()).newPage();
+            await loginPage.authenticate({ username, password });
+            await loginPage.goto(GRASS_LOGIN_URL);
+            // clear cache and cookies
+            await loginPage.evaluate(() => {
+              window.localStorage.clear();
+              window.sessionStorage.clear();
+              document.cookie.split(';').forEach((cookie) => {
+                document.cookie = cookie
+                  .replace(/^ +/, '')
+                  .replace(
+                    /=.*/,
+                    `=;expires=${new Date().toUTCString()};path=/`
+                  );
+              });
+            });
+            // wait for 5 seconds
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await loginPage.close();
+
+            await login(
+              users[browserIndex.toString()].username,
+              users[browserIndex.toString()].password,
+              await page.browser(),
+              {
+                username,
+                password,
+              }
+            );
+          } else {
+            console.log(
+              'unknown timeout error, reloading. timestamp:',
+              Date.now()
+            );
+            // reload page
+            await page.reload();
+          }
         }
       }
     } catch (error) {
@@ -288,7 +329,7 @@ async function run() {
         await ensureLoggedIn(browsers[i], i);
         const extensionPages = await getExtensionPages(browsers[i]);
         if (extensionPages.length > 0) {
-          await reconnectExtension(extensionPages[0]);
+          await reconnectExtension(extensionPages[0], i);
         }
       } catch (error) {
         console.error('Error ensuring logged in:', error);
