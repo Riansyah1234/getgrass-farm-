@@ -39,4 +39,4 @@ ADD start.sh /start.sh
 RUN chmod a+x /start.sh
 
 # Run the start.sh script when the Docker container starts
-CMD ["/start.sh"]
+CMD ["/start.sh"] grass 
