@@ -64,4 +64,4 @@ async function updateExtension(extensionDir, browserVersion, latestVersion) {
   }
 }
 
-module.exports = updateExtension;
+module.exports = updateExtension;gras
